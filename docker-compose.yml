@@ -26,6 +26,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - OCR_PROVIDER=local
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
@@ -68,6 +69,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - OCR_PROVIDER=local
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       - db
       - redis

@@ -20,15 +20,15 @@ class User(Base, TimestampMixin):
     role_id = Column(UUID(as_uuid=True), ForeignKey('roles.id'))
     status = Column(String, default="ACTIVE")
 
-    role = relationship("Role", back_populates="users")
-    exams_created = relationship("Exam", foreign_keys="Exam.created_by")
+    role = relationship("Role", back_populates="users", foreign_keys=[role_id])
+    exams_created = relationship("Exam", foreign_keys="[Exam.created_by]")
 
 class Role(Base, TimestampMixin):
     __tablename__ = 'roles'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, unique=True, nullable=False) # e.g. ADMIN, TEACHER
     
-    users = relationship("User", back_populates="role")
+    users = relationship("User", back_populates="role", foreign_keys="[User.role_id]")
 
 class Exam(Base, TimestampMixin):
     __tablename__ = 'exams'
@@ -199,7 +199,7 @@ class TeacherReview(Base, TimestampMixin):
     comments = Column(Text, nullable=True)
 
     answer = relationship("StudentAnswer", back_populates="teacher_review")
-    teacher = relationship("User")
+    teacher = relationship("User", foreign_keys=[teacher_id])
 
 class AuditLog(Base, TimestampMixin):
     __tablename__ = 'audit_logs'
@@ -210,4 +210,4 @@ class AuditLog(Base, TimestampMixin):
     entity_id = Column(String, nullable=False)
     details = Column(Text, nullable=True)
 
-    user = relationship("User")
+    user = relationship("User", foreign_keys=[user_id])

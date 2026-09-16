@@ -13,7 +13,7 @@ const OCRReview = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/answers/${answerId}/ocr`);
+        const response = await axios.get(`/api/answers/${answerId}/ocr`);
         setOcrResults(response.data);
       } catch (error) {
         console.error("Error fetching OCR results", error);
@@ -26,7 +26,7 @@ const OCRReview = () => {
 
   const handleSave = async (ocrId: string) => {
     try {
-      await axios.post(`http://localhost:8000/api/answers/${answerId}/ocr/${ocrId}/correct`, {
+      await axios.post(`/api/answers/${answerId}/ocr/${ocrId}/correct`, {
         text: editValue
       });
       setOcrResults(ocrResults.map(r => r.id === ocrId ? { ...r, corrected_text: editValue } : r));
@@ -36,78 +36,84 @@ const OCRReview = () => {
     }
   };
 
-  if (loading) return <div className="p-8">Loading OCR Data...</div>;
+  if (loading) return <div className="card text-center text-muted">Loading OCR Data...</div>;
 
   return (
-    <div className="p-8 h-full flex flex-col">
-      <h2 className="text-2xl font-bold mb-6">OCR Review</h2>
+    <div className="animate-fade-in flex flex-col" style={{ height: '100%' }}>
+      <div className="header-actions">
+        <h2>OCR Review</h2>
+      </div>
       
       {ocrResults.length === 0 ? (
-        <div className="bg-white p-6 rounded border">No OCR results found for this answer.</div>
+        <div className="card text-center text-muted">No OCR results found for this answer.</div>
       ) : (
-        <div className="flex-1 flex gap-6 overflow-hidden">
+        <div className="flex gap-6" style={{ flex: 1, overflow: 'hidden' }}>
           {/* We assume page 1 for simplicity in this view */}
-          <div className="w-1/2 bg-gray-200 border rounded flex flex-col">
-             <div className="p-2 border-b bg-gray-50 font-medium">Original Image</div>
-             <div className="flex-1 p-4 overflow-auto flex items-center justify-center text-gray-500">
+          <div className="card flex flex-col" style={{ width: '50%', padding: 0, overflow: 'hidden' }}>
+             <div className="font-bold text-sm" style={{ padding: '0.75rem', borderBottom: '1px solid var(--card-border)', background: 'rgba(0,0,0,0.1)' }}>
+               Original Image
+             </div>
+             <div className="flex items-center justify-between text-muted" style={{ flex: 1, padding: '1rem', overflow: 'auto', justifyContent: 'center' }}>
                {/* In a real app, this would be an <img src={...} /> referencing the actual processed image path */}
                [Image Preview Area]
              </div>
           </div>
           
-          <div className="w-1/2 flex flex-col gap-4 overflow-y-auto pr-2">
+          <div className="flex flex-col gap-4" style={{ width: '50%', overflowY: 'auto', paddingRight: '0.5rem' }}>
             {ocrResults.map((result) => (
-              <div key={result.id} className="bg-white border rounded shadow-sm flex flex-col">
-                <div className="p-3 border-b bg-gray-50 flex justify-between items-center">
+              <div key={result.id} className="card flex flex-col" style={{ padding: 0 }}>
+                <div className="flex justify-between items-center" style={{ padding: '0.75rem', borderBottom: '1px solid var(--card-border)', background: 'rgba(0,0,0,0.1)' }}>
                   <div>
-                    <span className="font-semibold text-sm">Provider:</span> {result.provider_name}
-                    <span className="ml-4 font-semibold text-sm">Confidence:</span> 
-                    <span className={`ml-1 ${result.confidence < 0.6 ? 'text-red-600 font-bold' : 'text-green-600'}`}>
+                    <span className="font-bold text-sm">Provider:</span> <span className="text-sm">{result.provider_name}</span>
+                    <span className="font-bold text-sm" style={{ marginLeft: '1rem' }}>Confidence:</span> 
+                    <span className={`badge ${result.confidence < 0.6 ? 'badge-danger' : 'badge-success'}`} style={{ marginLeft: '0.25rem' }}>
                       {(result.confidence * 100).toFixed(1)}%
                     </span>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
                     {editingId !== result.id && (
                       <button 
                         onClick={() => {
                           setEditingId(result.id);
                           setEditValue(result.corrected_text || result.extracted_text);
                         }}
-                        className="p-1 hover:bg-gray-200 rounded text-gray-600"
+                        className="btn btn-secondary"
+                        style={{ padding: '0.25rem 0.5rem' }}
                         title="Edit Text"
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={14} />
                       </button>
                     )}
                   </div>
                 </div>
                 
-                <div className="p-4">
+                <div style={{ padding: '1rem' }}>
                   {editingId === result.id ? (
                     <div className="flex flex-col gap-2">
                       <textarea
-                        className="w-full h-40 p-2 border rounded font-mono text-sm"
+                        className="text-sm"
+                        style={{ width: '100%', height: '160px', padding: '0.5rem', border: '1px solid var(--card-border)', borderRadius: 'var(--radius-sm)', background: 'rgba(0,0,0,0.2)', color: 'inherit', fontFamily: 'monospace' }}
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
                         dir="auto"
                       />
-                      <div className="flex justify-end space-x-2">
+                      <div className="flex justify-between gap-2" style={{ justifyContent: 'flex-end' }}>
                         <button 
                           onClick={() => setEditingId(null)}
-                          className="px-3 py-1 border rounded text-gray-600 hover:bg-gray-50 flex items-center gap-1"
+                          className="btn btn-secondary"
                         >
                           <X size={16} /> Cancel
                         </button>
                         <button 
                           onClick={() => handleSave(result.id)}
-                          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+                          className="btn btn-primary"
                         >
-                          <Check size={16} /> Save Correction
+                          <Check size={16} /> Save
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="font-mono text-sm whitespace-pre-wrap p-2 bg-gray-50 rounded border min-h-[10rem]">
+                    <div className="text-sm" style={{ padding: '0.75rem', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--card-border)', minHeight: '10rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
                       {result.corrected_text || result.extracted_text}
                     </div>
                   )}
