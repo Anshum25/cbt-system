@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: cbt_user
+      POSTGRES_PASSWORD: cbt_password
+      POSTGRES_DB: cbt_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+      - ./storage_data:/app/storage_data
+    environment:
+      - DATABASE_URL=postgresql://cbt_user:cbt_password@db:5432/cbt_db
+      - STORAGE_PATH=/app/storage_data
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - OCR_PROVIDER=local
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: always
+    command: npm run dev -- --host 0.0.0.0
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: always
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+      - ./storage_data:/app/storage_data
+    environment:
+      - DATABASE_URL=postgresql://cbt_user:cbt_password@db:5432/cbt_db
+      - STORAGE_PATH=/app/storage_data
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - OCR_PROVIDER=local
+    depends_on:
+      - db
+      - redis
+    restart: always
+    command: celery -A app.worker.celery_app worker --loglevel=info
+
+volumes:
+  postgres_data:

@@ -1,0 +1,19 @@
+from .models import (
+    Base,
+    User,
+    Role,
+    Exam,
+    Question,
+    ModelAnswer,
+    EvaluationCriterion,
+    Student,
+    ExamAttempt,
+    StudentAnswer,
+    AnswerPage,
+    OCRResult,
+    AnswerEvaluation,
+    Evaluation,
+    CalibrationSample,
+    TeacherReview,
+    AuditLog
+)
