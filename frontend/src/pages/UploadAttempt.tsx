@@ -15,26 +15,23 @@ const UploadAttempt = () => {
 
   const [studentAnswerFile, setStudentAnswerFile] = useState<File | null>(null);
 
+  const [questions, setQuestions] = useState<any[]>([]);
+
   useEffect(() => {
-    // Fetch the exam to get its questions
-    const fetchExam = async () => {
+    // Fetch the exam's questions
+    const fetchQuestions = async () => {
       try {
-        const res = await axios.get(`/api/exams/${examId}`);
-        // Assuming the endpoint returns questions, or we just need any question UUID.
-        // Wait, the /api/exams/{id} doesn't seem to return questions deeply nested based on schemas, but let's see.
-        // Actually, we can fetch all exams and get questions, or just use a mock for now.
-        // Let's assume /api/exams/ returns nested or we can just fetch /exams
-        // For simplicity, we'll just allow user to input a question ID if none is found, or we'll have to fetch questions.
-        // Actually, since the user just created the exam, the question might not be directly available.
-        // But let's assume they know the question ID, or we fetch it.
-        // Let's do a quick hack for the demo to fetch all questions for the exam (we might need a route for that, but none exists in the audit).
-        // If there's no route to get questions by exam, we can just use a dummy UUID and let the backend fail, or...
-        // Let's provide a text input for questionId for safety, prefilled if we could get it.
+        const res = await axios.get(`/api/exams/${examId}/questions`);
+        setQuestions(res.data);
+        if (res.data.length > 0) {
+          setQuestionId(res.data[0].id);
+        }
       } catch (e) {
         console.error(e);
+        setError("Failed to fetch questions for this exam.");
       }
     };
-    fetchExam();
+    fetchQuestions();
   }, [examId]);
 
   const handleUpload = async (e: React.FormEvent) => {
@@ -71,10 +68,20 @@ const UploadAttempt = () => {
       });
 
       alert("Student answer successfully uploaded! It is now being processed by OCR and AI.");
-      navigate(`/answers/${answerId}/ocr-review`); // Go directly to OCR Review so teacher can proceed!
+      navigate(`/answers/${answerId}/status`);
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.detail || "An error occurred during upload.");
+      let errMsg = "An error occurred during upload.";
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          errMsg = err.response.data.detail.map((d: any) => `${d.loc?.join('.')} : ${d.msg}`).join(", ");
+        } else if (typeof err.response.data.detail === "string") {
+          errMsg = err.response.data.detail;
+        } else {
+          errMsg = JSON.stringify(err.response.data.detail);
+        }
+      }
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -102,9 +109,24 @@ const UploadAttempt = () => {
         </div>
 
         <div>
-          <label className="text-sm font-bold text-muted mb-2 block">Question ID (UUID)</label>
-          <input type="text" className="form-input" required value={questionId} onChange={e => setQuestionId(e.target.value)} placeholder="Paste the Question UUID here" />
-          <p className="text-xs text-muted mt-2">Because we don't have a question listing API yet, please paste the question UUID generated during Exam Creation.</p>
+          <label className="text-sm font-bold text-muted mb-2 block">Question</label>
+          <select 
+            className="form-input" 
+            value={questionId} 
+            onChange={e => setQuestionId(e.target.value)}
+            disabled={questions.length === 0}
+            required
+          >
+            {questions.length === 0 ? (
+              <option value="">No questions found for this exam</option>
+            ) : (
+              questions.map((q, idx) => (
+                <option key={q.id} value={q.id}>
+                  Q{idx + 1}: {q.question_text.length > 50 ? q.question_text.substring(0, 50) + '...' : q.question_text}
+                </option>
+              ))
+            )}
+          </select>
         </div>
 
         <div>

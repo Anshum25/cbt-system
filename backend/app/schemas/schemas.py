@@ -63,3 +63,25 @@ class AttemptOut(BaseModel):
     status: str
     class Config:
         from_attributes = True
+
+class StatsOut(BaseModel):
+    total_exams: int
+    pending_reviews: int
+    total_attempts: int
+    total_students: int
+
+class StudentDetailsOut(BaseModel):
+    id: UUID
+    name: str
+    enrollment_number: str
+    class Config:
+        from_attributes = True
+
+class AttemptDetailOut(BaseModel):
+    id: UUID
+    student: StudentDetailsOut
+    status: str
+    created_at: datetime
+    answers: List[StudentAnswerOut]
+    class Config:
+        from_attributes = True

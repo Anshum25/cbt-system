@@ -16,7 +16,7 @@ class GeminiLLMProvider(LLMProvider):
 
     @property
     def model_version(self) -> str:
-        return "gemini-1.5-pro"
+        return "gemini-3.5-flash"
 
     def evaluate(self, prompt: str, system_prompt: str) -> EvaluationResponse:
         model = self.genai.GenerativeModel(
@@ -28,5 +28,14 @@ class GeminiLLMProvider(LLMProvider):
         )
         response = model.generate_content(prompt)
         
-        data = json.loads(response.text)
+        # Strip markdown formatting if present
+        text = response.text.strip()
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.startswith("```"):
+            text = text[3:]
+        if text.endswith("```"):
+            text = text[:-3]
+            
+        data = json.loads(text.strip())
         return EvaluationResponse(**data)

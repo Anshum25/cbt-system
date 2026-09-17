@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
+from sqlalchemy.exc import IntegrityError
 import json
 
 from app.core.database import get_db
@@ -30,6 +31,12 @@ def get_exam(exam_id: UUID, db: Session = Depends(get_db)):
     if not db_exam:
         raise HTTPException(status_code=404, detail="Exam not found")
     return db_exam
+
+@router.get("/exams/{exam_id}/questions", response_model=List[QuestionOut])
+def get_exam_questions(exam_id: UUID, db: Session = Depends(get_db)):
+    questions = db.query(Question).filter(Question.exam_id == exam_id).order_by(Question.order_num).all()
+    return questions
+
 
 @router.post("/exams/{exam_id}/questions", response_model=QuestionOut)
 def create_question(exam_id: UUID, question: QuestionCreate, db: Session = Depends(get_db)):
@@ -78,7 +85,11 @@ def create_attempt(attempt: AttemptCreate, db: Session = Depends(get_db)):
 def create_student_answer(attempt_id: UUID, question_id: UUID, db: Session = Depends(get_db)):
     db_answer = StudentAnswer(attempt_id=attempt_id, question_id=question_id)
     db.add(db_answer)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Question ID {question_id} not found or invalid.")
     db.refresh(db_answer)
     return db_answer
 
@@ -110,6 +121,13 @@ def upload_student_answer_page(
     process_student_answer_ocr.delay(str(answer.id))
     
     return {"message": "Page uploaded successfully and OCR queued", "file_path": file_path}
+
+@router.get("/answers/{answer_id}", response_model=StudentAnswerOut)
+def get_student_answer(answer_id: UUID, db: Session = Depends(get_db)):
+    answer = db.query(StudentAnswer).filter(StudentAnswer.id == answer_id).first()
+    if not answer:
+        raise HTTPException(status_code=404, detail="Student answer not found")
+    return answer
 
 @router.get("/answers/{answer_id}/ocr")
 def get_ocr_results(answer_id: UUID, db: Session = Depends(get_db)):
@@ -231,5 +249,61 @@ def submit_teacher_review(
 def get_calibration_samples(db: Session = Depends(get_db)):
     from app.models.models import CalibrationSample
     return db.query(CalibrationSample).all()
+
+@router.get("/stats", response_model=dict)
+def get_stats(db: Session = Depends(get_db)):
+    from app.models.models import Exam, ExamAttempt, StudentAnswer, Student
+    total_exams = db.query(Exam).count()
+    pending_reviews = db.query(StudentAnswer).filter(StudentAnswer.status == 'REVIEW_REQUIRED').count()
+    total_attempts = db.query(ExamAttempt).count()
+    total_students = db.query(Student).count()
+    return {
+        "total_exams": total_exams,
+        "pending_reviews": pending_reviews,
+        "total_attempts": total_attempts,
+        "total_students": total_students
+    }
+
+@router.get("/attempts", response_model=list)
+def get_all_attempts(db: Session = Depends(get_db)):
+    from app.models.models import ExamAttempt, Student
+    attempts = db.query(ExamAttempt).order_by(ExamAttempt.created_at.desc()).limit(50).all()
+    result = []
+    for att in attempts:
+        student = db.query(Student).filter(Student.id == att.student_id).first()
+        result.append({
+            "id": str(att.id),
+            "exam_id": str(att.exam_id),
+            "status": att.status,
+            "created_at": att.created_at.isoformat(),
+            "student_name": student.name if student else "Unknown"
+        })
+    return result
+
+@router.get("/exams/{exam_id}/attempts", response_model=list)
+def get_exam_attempts(exam_id: UUID, db: Session = Depends(get_db)):
+    from app.models.models import ExamAttempt, Student, StudentAnswer
+    attempts = db.query(ExamAttempt).filter(ExamAttempt.exam_id == exam_id).order_by(ExamAttempt.created_at.desc()).all()
+    result = []
+    for att in attempts:
+        student = db.query(Student).filter(Student.id == att.student_id).first()
+        answers = db.query(StudentAnswer).filter(StudentAnswer.attempt_id == att.id).all()
+        result.append({
+            "id": str(att.id),
+            "student_name": student.name if student else "Unknown",
+            "enrollment_number": student.enrollment_number if student else "Unknown",
+            "status": att.status,
+            "created_at": att.created_at.isoformat(),
+            "answers": [
+                {
+                    "id": str(ans.id),
+                    "status": ans.status,
+                    "ai_score": ans.ai_score,
+                    "teacher_final_score": ans.teacher_final_score,
+                    "question_id": str(ans.question_id)
+                } for ans in answers
+            ]
+        })
+    return result
 
 

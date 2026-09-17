@@ -146,8 +146,19 @@ def evaluate_student_answer(self, answer_id: str):
         criteria = db.query(EvaluationCriterion).filter(EvaluationCriterion.question_id == question.id).all()
         ocr_results = db.query(OCRResult).filter(OCRResult.answer_id == answer_id).all()
 
-        if not question or not model_answer or not criteria or not ocr_results:
+        if not question or not model_answer or not ocr_results:
             raise Exception("Missing required data for evaluation")
+
+        if not criteria:
+            default_criterion = EvaluationCriterion(
+                question_id=question.id,
+                description="General correctness and completeness according to the model answer.",
+                max_marks=question.max_marks
+            )
+            db.add(default_criterion)
+            db.commit()
+            db.refresh(default_criterion)
+            criteria = [default_criterion]
 
         # Prepare inputs
         student_text = " ".join([r.corrected_text or r.extracted_text for r in ocr_results])

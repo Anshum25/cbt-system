@@ -25,7 +25,7 @@ services:
       - STORAGE_PATH=/app/storage_data
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - OCR_PROVIDER=local
+      - OCR_PROVIDER=gemini
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     ports:
       - "8000:8000"
@@ -68,7 +68,7 @@ services:
       - STORAGE_PATH=/app/storage_data
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - OCR_PROVIDER=local
+      - OCR_PROVIDER=gemini
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       - db

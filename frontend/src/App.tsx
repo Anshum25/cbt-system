@@ -6,6 +6,9 @@ import EvaluationReview from './pages/EvaluationReview';
 import Calibration from './pages/Calibration';
 import CreateExam from './pages/CreateExam';
 import UploadAttempt from './pages/UploadAttempt';
+import ProcessingStatus from './pages/ProcessingStatus';
+import ExamResults from './pages/ExamResults';
+import AttemptsQueue from './pages/AttemptsQueue';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -26,17 +29,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <Link to="/calibration" className="nav-link">
             <Activity size={20} /> <span>Calibration</span>
           </Link>
-          <Link to="/students" className="nav-link">
-            <Users size={20} /> <span>Students</span>
-          </Link>
           <Link to="/attempts" className="nav-link">
             <GraduationCap size={20} /> <span>Attempts</span>
-          </Link>
-          <Link to="/reviews" className="nav-link">
-            <CheckSquare size={20} /> <span>Reviews</span>
-          </Link>
-          <Link to="/settings" className="nav-link">
-            <Settings size={20} /> <span>Settings</span>
           </Link>
         </nav>
       </aside>
@@ -47,23 +41,39 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const Dashboard = () => (
-  <div className="animate-fade-in">
-    <div className="header-actions">
-      <h2>Dashboard</h2>
-    </div>
-    <div className="stat-grid">
-      <div className="card stat-card">
-        <h3 className="stat-title">Total Exams</h3>
-        <p className="stat-value">12</p>
+const Dashboard = () => {
+  const [stats, setStats] = useState({ total_exams: 0, pending_reviews: 0, total_attempts: 0, total_students: 0 });
+
+  useEffect(() => {
+    axios.get('/api/stats').then(res => setStats(res.data)).catch(console.error);
+  }, []);
+
+  return (
+    <div className="animate-fade-in">
+      <div className="header-actions">
+        <h2>Dashboard</h2>
       </div>
-      <div className="card stat-card">
-        <h3 className="stat-title">Pending Reviews</h3>
-        <p className="stat-value">5</p>
+      <div className="stat-grid">
+        <div className="card stat-card">
+          <h3 className="stat-title">Total Exams</h3>
+          <p className="stat-value">{stats.total_exams}</p>
+        </div>
+        <div className="card stat-card">
+          <h3 className="stat-title">Pending Reviews</h3>
+          <p className="stat-value">{stats.pending_reviews}</p>
+        </div>
+        <div className="card stat-card">
+          <h3 className="stat-title">Total Attempts</h3>
+          <p className="stat-value">{stats.total_attempts}</p>
+        </div>
+        <div className="card stat-card">
+          <h3 className="stat-title">Total Students</h3>
+          <p className="stat-value">{stats.total_students}</p>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ExamsList = () => {
   const [exams, setExams] = useState<any[]>([]);
@@ -89,12 +99,16 @@ const ExamsList = () => {
               <div>
                 <h3 className="font-bold text-lg">{exam.title}</h3>
                 <p className="text-sm text-muted">{exam.subject_code} - {exam.description}</p>
-                {/* For demo purposes, we will just display the exam ID for copy/pasting if needed */}
                 <p className="text-xs text-muted font-mono mt-1">Exam ID: {exam.id}</p>
               </div>
-              <Link to={`/exams/${exam.id}/attempts/new`} className="btn btn-secondary">
-                Upload Student Attempt
-              </Link>
+              <div className="flex gap-2">
+                <Link to={`/exams/${exam.id}/attempts`} className="btn btn-secondary">
+                  View Results
+                </Link>
+                <Link to={`/exams/${exam.id}/attempts/new`} className="btn btn-primary">
+                  Upload Attempt
+                </Link>
+              </div>
             </div>
           ))}
         </div>
@@ -112,6 +126,9 @@ function App() {
           <Route path="/exams" element={<ExamsList />} />
           <Route path="/exams/new" element={<CreateExam />} />
           <Route path="/exams/:examId/attempts/new" element={<UploadAttempt />} />
+          <Route path="/exams/:examId/attempts" element={<ExamResults />} />
+          <Route path="/attempts" element={<AttemptsQueue />} />
+          <Route path="/answers/:answerId/status" element={<ProcessingStatus />} />
           <Route path="/answers/:answerId/ocr-review" element={<OCRReview />} />
           <Route path="/answers/:answerId/evaluation" element={<EvaluationReview />} />
           <Route path="/calibration" element={<Calibration />} />
