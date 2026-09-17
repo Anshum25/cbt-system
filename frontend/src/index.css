@@ -1,25 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette - Premium Dark Theme */
-  --bg-color: #050505;
-  --bg-radial: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #050505 70%);
-  --sidebar-bg: rgba(15, 15, 20, 0.6);
-  --card-bg: rgba(20, 20, 25, 0.4);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-border-hover: rgba(255, 255, 255, 0.2);
+  /* Color Palette - Premium Light Theme */
+  --bg-color: #f8fafc;
+  --bg-radial: radial-gradient(circle at 50% 0%, #e2e8f0 0%, #f8fafc 70%);
+  --sidebar-bg: rgba(255, 255, 255, 0.7);
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --card-border-hover: rgba(0, 0, 0, 0.15);
   
   --primary-color: #3b82f6; 
-  --primary-hover: #60a5fa;
-  --text-main: #f8fafc; 
-  --text-muted: #94a3b8; 
-  --success: #10b981;
-  --danger: #f43f5e;
-  --warning: #fbbf24;
+  --primary-hover: #2563eb;
+  --text-main: #0f172a; 
+  --text-muted: #64748b; 
+  --success: #059669;
+  --danger: #dc2626;
+  --warning: #d97706;
   
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  --gradient-hover: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  --gradient-hover: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
   --gradient-glow: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #8b5cf6, #3b82f6);
 
   /* Spacing */
@@ -129,7 +129,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-link:hover, .nav-link.active {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(0, 0, 0, 0.04);
   color: var(--text-main);
   box-shadow: inset 3px 0 0 var(--primary-color);
 }
@@ -157,7 +157,7 @@ h1, h2, h3, h4, h5, h6 {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -199,13 +199,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.03);
   color: var(--text-main);
   border: 1px solid var(--card-border);
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .btn-danger {
@@ -221,7 +221,7 @@ h1, h2, h3, h4, h5, h6 {
 .form-input {
   width: 100%;
   padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
   color: inherit;
@@ -249,7 +249,7 @@ table {
 
 th {
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.03);
   color: var(--text-muted);
   font-weight: 600;
   font-size: 0.875rem;
@@ -260,12 +260,12 @@ th {
 
 td {
   padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   vertical-align: middle;
 }
 
 tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 tbody tr:last-child td {
@@ -357,6 +357,7 @@ tbody tr:last-child td {
   font-size: 2.5rem;
   font-weight: 700;
   background: var(--gradient-primary);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
