@@ -31,6 +31,21 @@ const ExamResults = () => {
     return <div className="text-center p-8 text-muted">Loading results...</div>;
   }
 
+  const getAttemptStatus = (attempt: any) => {
+    if (attempt.answers && attempt.answers.length > 0) {
+      // Since currently it's 1 answer per upload, we can just use the first answer's status
+      // or check if any are REVIEW_REQUIRED, etc.
+      const hasReviewRequired = attempt.answers.some((a: any) => a.status === 'REVIEW_REQUIRED');
+      if (hasReviewRequired) return 'REVIEW_REQUIRED';
+      
+      const allFinalized = attempt.answers.every((a: any) => a.status === 'FINALIZED' || a.status === 'EVALUATED');
+      if (allFinalized) return 'EVALUATED';
+      
+      return attempt.answers[0].status;
+    }
+    return attempt.status;
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'EVALUATED':
@@ -86,7 +101,7 @@ const ExamResults = () => {
                     <td className="font-medium">{attempt.student_name}</td>
                     <td className="text-muted">{attempt.enrollment_number}</td>
                     <td className="text-muted">{new Date(attempt.created_at).toLocaleString()}</td>
-                    <td>{getStatusBadge(attempt.status)}</td>
+                    <td>{getStatusBadge(getAttemptStatus(attempt))}</td>
                     <td className="font-bold text-lg text-primary-color">
                       {calculateTotalScore(attempt.answers).toFixed(1)}
                     </td>

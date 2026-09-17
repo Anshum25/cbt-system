@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Upload, Loader, User } from 'lucide-react';
+import { Upload, Loader, User, Hash } from 'lucide-react';
 
 const UploadAttempt = () => {
   const { examId } = useParams();
@@ -9,12 +9,11 @@ const UploadAttempt = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // To keep it simple, we fetch the first question of this exam to upload against.
   const [questionId, setQuestionId] = useState("");
-  const [studentId, setStudentId] = useState("00000000-0000-0000-0000-000000000001"); // Placeholder UUID for testing
+  const [studentName, setStudentName] = useState("");
+  const [enrollmentNumber, setEnrollmentNumber] = useState("");
 
   const [studentAnswerFile, setStudentAnswerFile] = useState<File | null>(null);
-
   const [questions, setQuestions] = useState<any[]>([]);
 
   useEffect(() => {
@@ -47,7 +46,8 @@ const UploadAttempt = () => {
       // 1. Create Attempt
       const attemptRes = await axios.post('/api/attempts', {
         exam_id: examId,
-        student_id: studentId,
+        student_name: studentName,
+        enrollment_number: enrollmentNumber,
         start_time: new Date().toISOString()
       });
       const attemptId = attemptRes.data.id;
@@ -101,10 +101,18 @@ const UploadAttempt = () => {
 
       <form onSubmit={handleUpload} className="card flex flex-col gap-6">
         <div>
-          <label className="text-sm font-bold text-muted mb-2 block">Student ID (UUID)</label>
+          <label className="text-sm font-bold text-muted mb-2 block">Student Name</label>
           <div className="flex gap-2 items-center">
             <User className="text-muted" size={20} />
-            <input type="text" className="form-input" required value={studentId} onChange={e => setStudentId(e.target.value)} />
+            <input type="text" className="form-input" required value={studentName} onChange={e => setStudentName(e.target.value)} placeholder="Enter student name" />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-bold text-muted mb-2 block">Enrollment Number</label>
+          <div className="flex gap-2 items-center">
+            <Hash className="text-muted" size={20} />
+            <input type="text" className="form-input" required value={enrollmentNumber} onChange={e => setEnrollmentNumber(e.target.value)} placeholder="e.g. EN1001" />
           </div>
         </div>
 
@@ -130,7 +138,7 @@ const UploadAttempt = () => {
         </div>
 
         <div>
-          <h3 className="font-bold text-lg border-b pb-2 mb-4 mt-4">Upload Student Answer Page</h3>
+          <h3 className="font-bold text-lg border-b pb-2 mb-4 mt-4" style={{ borderColor: 'var(--card-border)' }}>Upload Student Answer Page</h3>
           <div className="border border-dashed rounded p-6 text-center" style={{ borderColor: 'var(--card-border)', background: 'rgba(0,0,0,0.1)' }}>
             <input 
               type="file" 

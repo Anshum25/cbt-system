@@ -53,7 +53,9 @@ class StudentAnswerOut(BaseModel):
         from_attributes = True
 
 class AttemptCreate(BaseModel):
-    student_id: UUID
+    student_id: Optional[UUID] = None
+    student_name: Optional[str] = None
+    enrollment_number: Optional[str] = None
     exam_id: UUID
 
 class AttemptOut(BaseModel):

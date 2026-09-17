@@ -11,6 +11,8 @@ const STATUS_MESSAGES: Record<string, string> = {
   EVALUATING: 'AI is evaluating the answer...',
   EVALUATED: 'Evaluation Complete!',
   REVIEW_REQUIRED: 'Human Review Required',
+  FINALIZED: 'Teacher Review Finalized',
+  COMPLETED: 'Processing Completed',
   ERROR: 'An error occurred during processing.'
 };
 
@@ -29,7 +31,7 @@ const ProcessingStatus = () => {
         const currentStatus = res.data.status;
         setStatus(currentStatus);
 
-        if (currentStatus === 'EVALUATED' || currentStatus === 'REVIEW_REQUIRED' || currentStatus === 'ERROR') {
+        if (['EVALUATED', 'REVIEW_REQUIRED', 'FINALIZED', 'COMPLETED', 'ERROR'].includes(currentStatus)) {
           clearInterval(interval);
         }
       } catch (err) {
@@ -48,7 +50,7 @@ const ProcessingStatus = () => {
     return () => clearInterval(interval);
   }, [answerId]);
 
-  const isDone = status === 'EVALUATED' || status === 'REVIEW_REQUIRED';
+  const isDone = ['EVALUATED', 'REVIEW_REQUIRED', 'FINALIZED', 'COMPLETED'].includes(status);
   const isError = status === 'ERROR';
 
   return (

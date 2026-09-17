@@ -75,7 +75,22 @@ def upload_model_answer(
 
 @router.post("/attempts", response_model=AttemptOut)
 def create_attempt(attempt: AttemptCreate, db: Session = Depends(get_db)):
-    db_attempt = ExamAttempt(**attempt.model_dump())
+    if not attempt.student_id:
+        if not attempt.student_name or not attempt.enrollment_number:
+            raise HTTPException(status_code=400, detail="Must provide student_id or both student_name and enrollment_number")
+        
+        # Find or create student
+        student = db.query(Student).filter(Student.enrollment_number == attempt.enrollment_number).first()
+        if not student:
+            student = Student(name=attempt.student_name, enrollment_number=attempt.enrollment_number)
+            db.add(student)
+            db.commit()
+            db.refresh(student)
+        student_id = student.id
+    else:
+        student_id = attempt.student_id
+
+    db_attempt = ExamAttempt(student_id=student_id, exam_id=attempt.exam_id)
     db.add(db_attempt)
     db.commit()
     db.refresh(db_attempt)
