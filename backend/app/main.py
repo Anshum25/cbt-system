@@ -4,7 +4,11 @@ import os
 
 from app.api.endpoints import router as api_router
 
+from fastapi.staticfiles import StaticFiles
+
 app = FastAPI(title="CBT API", version="1.0.0")
+
+app.mount("/storage_data", StaticFiles(directory="/app/storage_data"), name="storage_data")
 
 app.add_middleware(
     CORSMiddleware,

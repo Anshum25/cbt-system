@@ -137,31 +137,43 @@ const EvaluationReview = () => {
         {/* Right Column: Criterion Breakdown */}
         <div className="flex flex-col gap-4" style={{ gridColumn: '1 / -1', lgGridColumn: 'span 2' }}>
           <h3 className="text-xl font-bold mb-2">Criterion Breakdown</h3>
-          {evaluation.criteria.map((crit: any, idx: number) => (
-            <div key={idx} className="card">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-4">
-                  <span className="font-bold">Criterion {idx + 1}</span>
-                  <span className={`badge ${
-                    crit.status === 'PRESENT' ? 'badge-success' :
-                    crit.status === 'PARTIALLY_PRESENT' ? 'badge-warning' :
-                    crit.status === 'ABSENT' ? 'badge-danger' :
-                    'badge-danger'
-                  }`}>
-                    {crit.status}
-                  </span>
+          <div className="flex gap-6">
+            <div className="flex-1 flex flex-col gap-4">
+              {evaluation.criteria.map((crit: any, idx: number) => (
+                <div key={idx} className="card">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-4">
+                      <span className="font-bold">Criterion {idx + 1}</span>
+                      <span className={`badge ${
+                        crit.status === 'PRESENT' ? 'badge-success' :
+                        crit.status === 'PARTIALLY_PRESENT' ? 'badge-warning' :
+                        crit.status === 'ABSENT' ? 'badge-danger' :
+                        'badge-danger'
+                      }`}>
+                        {crit.status}
+                      </span>
+                    </div>
+                    <div className="badge" style={{ background: 'rgba(14, 165, 233, 0.2)', color: 'var(--primary-color)' }}>
+                      Marks: {crit.awarded_marks}
+                    </div>
+                  </div>
+                  
+                  <div className="text-sm" style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
+                    <span className="font-bold text-muted mb-2 block" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>Evidence from Student Answer:</span>
+                    "{crit.evidence || crit.explanation}"
+                  </div>
                 </div>
-                <div className="badge" style={{ background: 'rgba(14, 165, 233, 0.2)', color: 'var(--primary-color)' }}>
-                  Marks: {crit.awarded_marks}
-                </div>
-              </div>
-              
-              <div className="text-sm" style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }}>
-                <span className="font-bold text-muted mb-2 block" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>Evidence from Student Answer:</span>
-                "{crit.evidence || crit.explanation}"
+              ))}
+            </div>
+            <div className="flex-1 card">
+              <span className="font-bold text-muted mb-4 block" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>Original Uploaded Answer</span>
+              <div className="flex flex-col gap-4">
+                {evaluation.image_urls && evaluation.image_urls.map((url: string, i: number) => (
+                  <img key={i} src={url} alt={`Student Answer Page ${i+1}`} style={{ width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)' }} />
+                ))}
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>

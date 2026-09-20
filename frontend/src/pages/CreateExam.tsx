@@ -97,7 +97,11 @@ const CreateExam = () => {
             </div>
             <div>
               <label className="text-sm font-bold text-muted mb-2 block">Total Marks</label>
-              <input type="number" className="form-input" required value={examData.total_marks} onChange={e => setExamData({...examData, total_marks: parseFloat(e.target.value)})} />
+              <input type="number" className="form-input" required value={examData.total_marks} onChange={e => {
+                const val = parseFloat(e.target.value) || 0;
+                setExamData({...examData, total_marks: val});
+                setQuestionData({...questionData, max_marks: val});
+              }} />
             </div>
           </div>
         </div>

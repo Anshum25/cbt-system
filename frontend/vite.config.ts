@@ -10,6 +10,10 @@ export default defineConfig({
       '/api': {
         target: 'http://backend:8000',
         changeOrigin: true
+      },
+      '/storage_data': {
+        target: 'http://backend:8000',
+        changeOrigin: true
       }
     }
   }

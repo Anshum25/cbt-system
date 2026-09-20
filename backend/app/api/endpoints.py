@@ -187,6 +187,7 @@ def get_evaluation(answer_id: UUID, db: Session = Depends(get_db)):
         
     return {
         "id": evaluation.id,
+        "image_urls": [f"/storage_data/{page.file_path}" for page in evaluation.answer.pages],
         "total_score": evaluation.total_score,
         "confidence": evaluation.confidence,
         "needs_human_review": evaluation.needs_human_review,
